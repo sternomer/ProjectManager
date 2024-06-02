@@ -19,7 +19,7 @@ To install and run the project, follow these steps:
 
 2. Navigate to the project directory:
     ```bash
-    cd ProjectManager
+    cd ProjectManager/src
     ```
 
 3. Install the dependencies:
