@@ -1,12 +1,18 @@
 import React from 'react';
-import { Grid, TextField, Button, Typography } from '@mui/material';
+import { Grid, TextField, IconButton, Typography, Box } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const DateInputs = ({ formData, handleDateChange, addDate }) => {
   return (
     <Grid item xs={12}>
-      <Typography variant="h6">תאריך מתרחב</Typography>
+      <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2}>
+        <IconButton onClick={addDate} color="primary" aria-label="add date">
+          <AddIcon />
+        </IconButton>
+        <Typography variant="body1">הוסף תאריך</Typography>
+      </Box>
       {formData.dates.map((date, index) => (
-        <Grid container spacing={3} key={index}>
+        <Grid container spacing={3} key={index} style={{ marginBottom: '16px' }}>
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
@@ -41,9 +47,6 @@ const DateInputs = ({ formData, handleDateChange, addDate }) => {
           </Grid>
         </Grid>
       ))}
-      <Button variant="contained" onClick={addDate}>
-        הוסף תאריך
-      </Button>
     </Grid>
   );
 };

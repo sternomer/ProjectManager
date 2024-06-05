@@ -1,9 +1,28 @@
 import React, { useRef } from 'react';
-import { Grid, Box, Typography, IconButton, Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@mui/material';
+import {
+  Grid,
+  Box,
+  Typography,
+  IconButton,
+  Paper,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Button
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DescriptionIcon from '@mui/icons-material/Description'; // Default icon
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 interface FileType {
   fileName: string;
@@ -21,9 +40,32 @@ interface FileUploadProps {
   editFileName: (index: number) => void;
   deleteFile: (index: number) => void;
   addFile: () => void;
+  moveFileUp: (index: number) => void; // Function to move file up
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, handleFileNameChange, editFileName, deleteFile, addFile }) => {
+const getFileIcon = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'pdf':
+      return <PictureAsPdfIcon style={{ color: '#D32F2F' }} />;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+      return <ImageIcon style={{ color: '#4CAF50' }} />;
+    case 'doc':
+    case 'docx':
+    case 'txt':
+      return <DescriptionIcon style={{ color: '#1976D2' }} />;
+    case 'xls':
+    case 'xlsx':
+      return <InsertDriveFileIcon style={{ color: '#1E8449' }} />;
+    default:
+      return <InsertDriveFileIcon style={{ color: '#9E9E9E' }} />;
+  }
+};
+
+const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, handleFileNameChange, editFileName, deleteFile, addFile, moveFileUp }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -35,9 +77,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, han
   return (
     <Grid item xs={12}>
       <Typography variant="h6">העלאת מסמכים</Typography>
-      <Box display="flex" justifyContent="center" alignItems="center" mb={2} p={2} border="1px dashed #ccc" borderRadius="8px" onClick={handleClick} style={{ cursor: 'pointer' }}>
+      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" mb={2} p={2} border="1px dashed #ccc" borderRadius="8px" onClick={handleClick} style={{ cursor: 'pointer' }}>
         <CloudUploadIcon style={{ fontSize: '48px', color: '#ccc' }} />
-        <Box ml={2}>
+        <Box mt={1}>
           <Typography variant="body1" color="primary">
             לחץ כאן או גרור קובץ להעלאה
           </Typography>
@@ -54,6 +96,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, han
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>סוג הקובץ</TableCell>
               <TableCell>שם הקובץ</TableCell>
               <TableCell>שם לתצוגה</TableCell>
               <TableCell>גודל הקובץ</TableCell>
@@ -63,6 +106,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, han
           <TableBody>
             {formData.files.map((file, index) => (
               <TableRow key={index}>
+                <TableCell>{getFileIcon(file.fileName)}</TableCell>
                 <TableCell>{file.fileName}</TableCell>
                 <TableCell>
                   {file.isEditing ? (
@@ -83,17 +127,18 @@ const FileUpload: React.FC<FileUploadProps> = ({ formData, handleFileChange, han
                   <IconButton onClick={() => deleteFile(index)}>
                     <DeleteIcon />
                   </IconButton>
+                  <IconButton onClick={() => moveFileUp(index)}>
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                  <IconButton>
+                    <DragIndicatorIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <Box mt={2}>
-        <Button variant="contained" onClick={addFile}>
-          הוסף קובץ
-        </Button>
-      </Box>
     </Grid>
   );
 };

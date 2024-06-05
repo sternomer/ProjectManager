@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Grid, FormControlLabel, Switch, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Grid, FormControlLabel, Switch, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Box } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info'; 
 
-const ToggleSwitch = ({ formData, handleToggleChange }: { formData: any, handleToggleChange: any }) => {
+const ToggleSwitch = ({ formData, handleToggleChange }) => {
   const [open, setOpen] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +29,14 @@ const ToggleSwitch = ({ formData, handleToggleChange }: { formData: any, handleT
             name="isToggleOn"
           />
         }
-        label="כפתור מידע"
+        label={
+          <Box display="flex" alignItems="center">
+            <span>כפתור מידע</span>
+            <IconButton size="small" onClick={() => setOpen(true)}>
+              <InfoIcon />
+            </IconButton>
+          </Box>
+        }
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Information</DialogTitle>

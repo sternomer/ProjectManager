@@ -7,6 +7,7 @@ const RadioOptions = ({ formData, handleRadioChange }) => {
       <FormControl component="fieldset">
         <FormLabel component="legend">רדיו</FormLabel>
         <RadioGroup
+        row
           name="radioOption"
           value={formData.radioOption}
           onChange={handleRadioChange}

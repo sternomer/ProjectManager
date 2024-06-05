@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import { Container, Paper, Box, Tabs, Tab } from '@mui/material';
 import { useRouter } from 'next/router';
 
@@ -10,30 +10,124 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const router = useRouter();
-  const [selectedTab, setSelectedTab] = useState(router.pathname === '/summary' ? 1 : 0);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setSelectedTab(newValue);
-    if (newValue === 0) {
-      router.push('/');
-    } else if (newValue === 1) {
-      router.push('/summary');
+  useEffect(() => {
+    if (router.pathname === '/summary') {
+      setSelectedTab(1);
+    } else {
+      setSelectedTab(0);
     }
+  }, [router.pathname]);
+
+  const handleHomeClick = () => {
+    setSelectedTab(0);
+    router.push('/');
+  };
+
+  const handleSummaryClick = () => {
+    setSelectedTab(1);
+    router.push('/summary');
   };
 
   return (
-    <Container maxWidth={false} style={{ padding: 0, direction: 'rtl' }}>
-      <Paper elevation={3} style={{ padding: '20px', margin: '20px', width: '100%' }}>
-        <Box>
-          <Tabs value={selectedTab} onChange={handleTabChange} indicatorColor="primary" textColor="primary">
-            <Tab label="עמוד ראשי" />
-            <Tab label="סיכום" />
+    <Container
+      maxWidth='lg'
+      style={{
+        padding: '0',
+        direction: 'rtl',
+        backgroundColor: '#f0f4f8',
+        minHeight: '100vh',
+      }}
+    >
+      <Box
+        display='flex'
+        justifyContent='space-between'
+        alignItems='center'
+        style={{ overflow: 'hidden' }}
+      >
+        <Box display='flex' alignItems='center' style={{ flexShrink: 0 }}>
+          <Tabs
+            value={selectedTab}
+            indicatorColor='primary'
+            textColor='primary'
+          >
+            <Tab
+              icon={
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    border: `2px solid ${selectedTab === 0 ? '#1976d2' : '#e0e0e0'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {selectedTab === 0 && (
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#1976d2',
+                      }}
+                    />
+                  )}
+                </div>
+              }
+              label="עמוד ראשי"
+              onClick={handleHomeClick}
+            />
           </Tabs>
-          <Box marginTop={2}>
-            {children}
-          </Box>
         </Box>
-      </Paper>
+        <Box flexGrow={1} borderBottom={1} borderColor='divider' />
+        <Box display='flex' alignItems='center' style={{ flexShrink: 0 }}>
+          <Tabs
+            value={selectedTab}
+            indicatorColor='primary'
+            textColor='primary'
+          >
+            <Tab
+              icon={
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    border: `2px solid ${selectedTab === 1 ? '#1976d2' : '#e0e0e0'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {selectedTab === 1 && (
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        backgroundColor: '#1976d2',
+                      }}
+                    />
+                  )}
+                </div>
+              }
+              label="סיכום"
+              onClick={handleSummaryClick}
+            />
+          </Tabs>
+        </Box>
+      </Box>
+      <Box margin={2}>
+        <Paper
+          elevation={3}
+          style={{ padding: '20px', margin: '20px 0', overflow: 'hidden' }}
+        >
+          {children}
+        </Paper>
+      </Box>
     </Container>
   );
 };

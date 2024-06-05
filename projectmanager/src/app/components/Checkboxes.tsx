@@ -6,7 +6,7 @@ const Checkboxes = ({ formData, handleCheckboxChange }) => {
     <Grid item xs={12}>
       <FormControl component="fieldset">
         <FormLabel component="legend">צ'קבוקסים</FormLabel>
-        <FormGroup>
+        <FormGroup row>
           <FormControlLabel
             control={
               <Checkbox
@@ -26,6 +26,15 @@ const Checkboxes = ({ formData, handleCheckboxChange }) => {
               />
             }
             label="צ'קבוקס 2"
+          />
+           <FormControlLabel
+            control={
+              <Checkbox
+                disabled
+                checked={true}
+              />
+            }
+            label="צ'קבוקס דיסבלד"
           />
         </FormGroup>
       </FormControl>

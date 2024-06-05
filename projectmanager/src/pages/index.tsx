@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { Container, Typography, Box, Paper, Grid, Button, TextField, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { Delete as DeleteIcon, Edit as EditIcon, Save as SaveIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Box,
+  Paper,
+  Grid,
+  Button,
+  Typography,
+  Divider,
+} from '@mui/material';
 import { useRouter } from 'next/router';
 import queryString from 'query-string';
-import Layout from './layout';
 import ProjectDetails from '../app/components/ProjectDetails';
 import BudgetInput from '../app/components/BudgetInput';
 import ToggleSwitch from '../app/components/ToggleSwitch';
@@ -12,7 +18,8 @@ import RadioOptions from '../app/components/RadioOptions';
 import DateInputs from '../app/components/DateInputs';
 import FileUpload from '../app/components/FileUpload';
 import ComponentTable from '../app/components/ComponentTable';
-import SubmitButton from '../app/components/SubmitButton';
+import Layout from './layout';
+import DataTable from '../app/components/dataTable';
 
 interface DateType {
   openDate: string;
@@ -61,12 +68,15 @@ const Home: React.FC = () => {
     checkboxes: { box1: false, box2: false },
     radioOption: '',
     files: [],
-    components: [{ price: '', description: '' }]
+    components: [{ price: '', description: '' }],
   });
 
   const router = useRouter();
 
-  const handleFileChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = event.target.files;
     if (files && files.length > 0) {
       const file = files[0];
@@ -75,7 +85,7 @@ const Home: React.FC = () => {
         fileName: file.name,
         displayName: file.name.replace(/\.[^/.]+$/, ''),
         isEditing: false,
-        fileSize: `${(file.size / 1024).toFixed(2)} KB` // Convert size to KB and format it
+        fileSize: `${(file.size / 1024).toFixed(2)} KB`, // Convert size to KB and format it
       };
       setFormData((prevState) => ({
         ...prevState,
@@ -84,7 +94,10 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleFileNameChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileNameChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newFiles = [...formData.files];
     newFiles[index].displayName = event.target.value;
     setFormData((prevState) => ({
@@ -117,6 +130,18 @@ const Home: React.FC = () => {
         ...prevState.files,
         { fileName: '', displayName: '', isEditing: false, fileSize: '' }, // Add the missing 'fileSize' property
       ],
+    }));
+  };
+
+  const moveFileUp = (index) => {
+    if (index === 0) return; // Already at the top
+    const newFiles = [...formData.files];
+    const temp = newFiles[index - 1];
+    newFiles[index - 1] = newFiles[index];
+    newFiles[index] = temp;
+    setFormData((prevState) => ({
+      ...prevState,
+      files: newFiles,
     }));
   };
 
@@ -156,61 +181,255 @@ const Home: React.FC = () => {
     }
   };
 
+  const [data, setData] = useState([
+    { name: 'Shalom Rhye', role: 'יועץ משפטי', email: 'Shalom@gmail.com' },
+    { name: 'Olivia Rhye', role: '', email: 'Shalom@gmail.com' },
+  ]);
+
+  const handleDelete = (index) => {
+    const newData = data.filter((_, i) => i !== index);
+    setData(newData);
+  };
+
   return (
-    <Layout>
-      <Container dir="rtl">
-        <Typography variant="h4" gutterBottom>
-          כותרת דף
-        </Typography>
+    <div
+      style={{
+        backgroundColor: '#f0f4f8',
+        minHeight: '100vh',
+        padding: '20px',
+      }}
+    >
+      <Layout>
         <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
-          <Box component="form" noValidate autoComplete="off">
-            <Grid container spacing={3}>
-              <ProjectDetails formData={formData} handleChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }))} handleSelectChange={(e: React.ChangeEvent<{ value: unknown }>) => setFormData((prevState) => ({ ...prevState, projectType: e.target.value as string }))} />
-              <BudgetInput formData={formData} handleChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prevState) => ({ ...prevState, budget: e.target.value }))} />
-              <ToggleSwitch formData={formData} handleToggleChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prevState) => ({ ...prevState, isToggleOn: e.target.checked }))} />
-              <Checkboxes formData={formData} handleCheckboxChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prevState) => ({ ...prevState, checkboxes: { ...prevState.checkboxes, [e.target.name]: e.target.checked } }))} />
-              <RadioOptions formData={formData} handleRadioChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData((prevState) => ({ ...prevState, radioOption: e.target.value }))} />
-              <DateInputs formData={formData} handleDateChange={(index: number, field: string, value: string) => {
-                const newDates = [...formData.dates];
-                newDates[index] = { ...newDates[index], [field]: value };
-                setFormData((prevState) => ({
-                  ...prevState,
-                  dates: newDates,
-                }));
-              }} addDate={() => setFormData((prevState) => ({ ...prevState, dates: [...prevState.dates, { openDate: '', closeDate: '' }] }))} />
-              <FileUpload
-                formData={formData}
-                handleFileChange={handleFileChange}
-                handleFileNameChange={handleFileNameChange}
-                editFileName={editFileName}
-                deleteFile={deleteFile}
-                addFile={addFile}
-              />
-              <ComponentTable
-                formData={formData}
-                setFormData={setFormData}
-                handleComponentChange={(index: number, field: string, value: string) => {
-                  const newComponents = [...formData.components];
-                  newComponents[index] = { ...newComponents[index], [field]: value };
-                  setFormData((prevState) => ({
-                    ...prevState,
-                    components: newComponents,
-                  }));
-                }}
-                addQualityComponent={() => setFormData((prevState) => ({ ...prevState, components: [...prevState.components, { price: '', description: 'רכיב איכות' }] }))}
-                addPriceComponent={() => setFormData((prevState) => ({ ...prevState, components: [...prevState.components, { price: '', description: 'רכיב מחיר' }] }))}
-                deleteComponent={(index: number) => setFormData((prevState) => ({ ...prevState, components: prevState.components.filter((_, i) => i !== index) }))}
-              />
-              <Grid item xs={12}>
-                <Button variant="contained" onClick={handleSubmit}>
-                  שלח
-                </Button>
+          <Container dir='rtl' maxWidth='lg'>
+            <Typography variant='h6'>פרטי פרויקט</Typography>
+            <Divider />
+            <Box
+              component='form'
+              noValidate
+              autoComplete='off'
+              style={{ marginTop: '20px' }}
+            >
+              <Grid container spacing={3} direction='column'>
+                <ProjectDetails
+                  formData={formData}
+                  handleChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      [e.target.name]: e.target.value,
+                    }))
+                  }
+                  handleSelectChange={(
+                    e: React.ChangeEvent<{ value: unknown }>
+                  ) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      projectType: e.target.value as string,
+                    }))
+                  }
+                />
+                <BudgetInput
+                  formData={formData}
+                  handleChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      budget: e.target.value,
+                    }))
+                  }
+                />
+                <ToggleSwitch
+                  formData={formData}
+                  handleToggleChange={(
+                    e: React.ChangeEvent<HTMLInputElement>
+                  ) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      isToggleOn: e.target.checked,
+                    }))
+                  }
+                />
+                <Box
+                  display='flex'
+                  flexDirection='row'
+                  justifyContent='space-between'
+                >
+                  <Checkboxes
+                    formData={formData}
+                    handleCheckboxChange={(
+                      e: React.ChangeEvent<HTMLInputElement>
+                    ) =>
+                      setFormData((prevState) => ({
+                        ...prevState,
+                        checkboxes: {
+                          ...prevState.checkboxes,
+                          [e.target.name]: e.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                </Box>
+                <RadioOptions
+                  formData={formData}
+                  handleRadioChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      radioOption: e.target.value,
+                    }))
+                  }
+                />
               </Grid>
-            </Grid>
-          </Box>
+            </Box>
+          </Container>
         </Paper>
-      </Container>
-    </Layout>
+
+        <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Container dir='rtl' maxWidth='lg'>
+            <Typography variant='h6'>טבלת נתונים</Typography>
+            <Divider />
+            <Box
+              component='form'
+              noValidate
+              autoComplete='off'
+              style={{ marginTop: '20px' }}
+            >
+              <Grid container spacing={3}></Grid>
+              <DataTable data={data} handleDelete={handleDelete}></DataTable>
+            </Box>
+          </Container>
+        </Paper>
+
+        <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Container dir='rtl' maxWidth='lg'>
+            <Typography variant='h6'>תאריכים</Typography>
+            <Divider />
+            <Box
+              component='form'
+              noValidate
+              autoComplete='off'
+              style={{ marginTop: '20px' }}
+            >
+              <Grid container spacing={3}>
+                <DateInputs
+                  formData={formData}
+                  handleDateChange={(
+                    index: number,
+                    field: string,
+                    value: string
+                  ) => {
+                    const newDates = [...formData.dates];
+                    newDates[index] = { ...newDates[index], [field]: value };
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      dates: newDates,
+                    }));
+                  }}
+                  addDate={() =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      dates: [
+                        ...prevState.dates,
+                        { openDate: '', closeDate: '' },
+                      ],
+                    }))
+                  }
+                />
+              </Grid>
+            </Box>
+          </Container>
+        </Paper>
+
+        <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Container dir='rtl' maxWidth='lg'>
+            <Typography variant='h6'>קבצים</Typography>
+            <Divider />
+            <Box
+              component='form'
+              noValidate
+              autoComplete='off'
+              style={{ marginTop: '20px' }}
+            >
+              <Grid container spacing={3}>
+                <FileUpload
+                  formData={formData}
+                  handleFileChange={handleFileChange}
+                  handleFileNameChange={handleFileNameChange}
+                  editFileName={editFileName}
+                  deleteFile={deleteFile}
+                  addFile={addFile}
+                  moveFileUp={moveFileUp}
+                />
+              </Grid>
+            </Box>
+          </Container>
+        </Paper>
+
+        <Paper elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Container dir='rtl' maxWidth='lg'>
+            <Typography variant='h6'>רכיבים</Typography>
+            <Divider />
+            <Box
+              component='form'
+              noValidate
+              autoComplete='off'
+              style={{ marginTop: '20px' }}
+            >
+              <Grid container spacing={3}>
+                <ComponentTable
+                  formData={formData}
+                  setFormData={setFormData}
+                  handleComponentChange={(
+                    index: number,
+                    field: string,
+                    value: string
+                  ) => {
+                    const newComponents = [...formData.components];
+                    newComponents[index] = {
+                      ...newComponents[index],
+                      [field]: value,
+                    };
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      components: newComponents,
+                    }));
+                  }}
+                  addQualityComponent={() =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      components: [
+                        ...prevState.components,
+                        { price: '', description: 'רכיב איכות' },
+                      ],
+                    }))
+                  }
+                  deleteComponent={(index: number) =>
+                    setFormData((prevState) => ({
+                      ...prevState,
+                      components: prevState.components.filter(
+                        (_, i) => i !== index
+                      ),
+                    }))
+                  }
+                />
+              </Grid>
+            </Box>
+          </Container>
+        </Paper>
+
+        <Container dir='rtl' maxWidth='lg'>
+          <Grid container spacing={3}>
+            <Grid item xs={12} display='flex' justifyContent='flex-end'>
+              <Button
+                variant='contained'
+                onClick={handleSubmit}
+                style={{ borderRadius: '8px' }}
+              >
+                שלח
+              </Button>
+            </Grid>
+          </Grid>
+        </Container>
+      </Layout>
+    </div>
   );
 };
 
